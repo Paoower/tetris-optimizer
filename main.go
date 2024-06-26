@@ -1,32 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"os"
-
 	src "tetris-optimizer/src"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run . <filename>")
-		return
-	}
+	content, err := os.ReadFile(os.Args[1])
+	src.CheckError(err)
 
-	filename := os.Args[1]
+	sep := []byte{10}
+	transformedContent := bytes.Split(content, sep)
 
-	tetrominoes, err := src.ReadTetrominoes(filename)
-	if err != nil {
-		fmt.Println("ERROR")
-		fmt.Println(err)
-		return
-	}
+	src.CheckFormat(transformedContent)
 
-	board := src.FindSmallestSquare(tetrominoes)
-	if board == nil {
-		fmt.Println("ERROR")
-		return
-	}
+	tetrominoesList := src.FindTetrominoes(transformedContent)
+	minSize := src.FindBoardMinSize(tetrominoesList)
 
-	src.PrintBoard(board)
+	src.CreateBoard(minSize)
+	src.TryPosition(0, tetrominoesList, minSize)
 }
